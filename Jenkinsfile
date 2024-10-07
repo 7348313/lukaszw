@@ -8,7 +8,7 @@ pipeline {
             steps {
                 script {
                     cleanWs()
-                    git credentialsId: 'github-token', url: 'https://github.com/7348313/lukaszw.git', branch: 'main'
+                    git credentialsId: 'jenkins', url: 'https://github.com/7348313/lukaszw.git', branch: 'main'
                 }
             }
         }
