@@ -23,7 +23,7 @@ pipeline {
                 sh '''
                     docker run --name zap --rm \
                     --add-host=host.docker.internal:host-gateway \
-                    -v /Users/lukaszwojcik/BezpiecznyKod/lukaszw/.zap/passive.yaml:/zap/wrk/passive_Scan.yaml:rm \
+                    -v /Users/lukaszwojcik/BezpiecznyKod/lukaszw/.zap:/zap/wrk:rw \
                     -v /Users/lukaszwojcik/Downloads/Reports/:/zap/wrk/reports \
                     -t ghcr.io/zaproxy/zaproxy:stable bash -c \
                     "zap.sh -cmd -addoninstall communityScripts && \
