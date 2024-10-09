@@ -17,7 +17,7 @@ pipeline {
                 sh '''
                     docker run --name juice-shop -d --rm \\
                         -p 3000:3000 \\
-                        bkimminich/juice-shop1
+                        bkimminich/juice-shop
                         sleep 5
                 '''
                 sh '''
@@ -40,7 +40,7 @@ post {
     always {
         script{
             sh '''
-                docker stop juice-shop1 || true
+                docker stop juice-shop || true
             '''
             defectDojoPublisher
                 artifact: '/tmp/zap_xml_report.xml'
