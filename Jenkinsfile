@@ -40,10 +40,11 @@ post {
     always {
         script{
             sh '''
+                docker cp zap:/zap/wrk/reports/zap_xml_report.xml ${WORKSPACE}/results/zap_xml_report.xml
                 docker stop juice-shop || true
             '''
             defectDojoPublisher
-                artifact: '/tmp/zap_xml_report.xml'
+                artifact: 'results/zap_xml_report.xml'
                 productName: 'Juice Shop'
                 scanType 'ZAP Scan'
                 engagementName: 'lukasik446@gmail.com'    
