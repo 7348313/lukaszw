@@ -15,13 +15,13 @@ pipeline {
         stage('zap scan') {
             steps {
                 sh '''
-                    docker run --name juice-shop -d --rm \\
-                        -p 3000:3000 \\
+                    docker run --name juice-shop -d --rm \
+                        -p 3000:3000 \
                         bkimminich/juice-shop
                         sleep 5
                 '''
                 sh '''
-                    docker run --name zap --rm \
+                    docker run --name zap \
                     --add-host=host.docker.internal:host-gateway \
                     -v /Users/lukaszwojcik/BezpiecznyKod/lukaszw/.zap:/zap/wrk:rw \
                     -v /Users/lukaszwojcik/Downloads/Reports/:/zap/wrk/reports \
@@ -29,25 +29,27 @@ pipeline {
                     "zap.sh -cmd -addoninstall communityScripts && \
                     zap.sh -cmd -addoninstall pscanrulesAlpha && \
                     zap.sh -cmd -addoninstall pscanrulesBeta && \
-                    zap.sh -cmd -autorun /zap/wrk/passive.yaml"
+                    zap.sh -cmd -autorun /zap/wrk/passive.yaml" || true
                 '''
                 sh 'ls -la'
             }
         }
     }
-}
-post {
-    always {
-        script{
-            sh '''
-                docker cp zap:/zap/wrk/reports/zap_xml_report.xml ${WORKSPACE}/results/zap_xml_report.xml
-                docker stop juice-shop || true
-            '''
-            defectDojoPublisher
-                artifact: 'results/zap_xml_report.xml'
-                productName: 'Juice Shop'
-                scanType 'ZAP Scan'
-                engagementName: 'lukasik446@gmail.com'    
+    post {
+        always {
+            script{
+                sh '''
+                    docker cp zap:/zap/wrk/reports/zap_xml_report.xml ${WORKSPACE}/results/zap_xml_report.xml
+                    docker stop juice-shop
+                    docker rm zap
+                '''
+                defectDojoPublisher
+                    artifact: 'results/zap_xml_report.xml'
+                    productName: 'Juice Shop'
+                    scanType 'ZAP Scan'
+                    engagementName: 'lukasik446@gmail.com'
+            }
         }
     }
 }
+
