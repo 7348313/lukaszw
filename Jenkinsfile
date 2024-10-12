@@ -43,11 +43,7 @@ pipeline {
                     docker stop juice-shop
                     docker rm zap
                 '''
-                defectDojoPublisher
-                    artifact: 'results/zap_xml_report.xml'
-                    productName: 'Juice Shop'
-                    scanType 'ZAP Scan'
-                    engagementName: 'lukasik446@gmail.com'
+                defectDojoPublisher(artifact: 'results/zap_xml_report.xml', productName: 'Juice Shop', scanType 'ZAP Scan', engagementName: 'lukasik446@gmail.com')
             }
         }
     }
