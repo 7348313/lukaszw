@@ -47,21 +47,13 @@ pipeline {
                         sh 'osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json'
                     }
                 }
-                post {
-                    always {
-                        defectDojoPublisher(artifact: 'results/sca-osv-scanner.json',
-                            productName: 'Juice Shop',
-                            scanType: 'OSV Scan',
-                            engagementName: 'lukasik446@gmail.com')
-                    }
-                }
-    }
     post {
         always {
             echo 'Archiving results...'
             archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
             echo 'Sending reports to DefectDojo...'
             defectDojoPublisher(artifact: 'results/zap_xml_report.xml', productName: 'Juice Shop', scanType: 'ZAP Scan', engagementName: 'lukasik446@gmail.com')
+            defectDojoPublisher(artifact: 'results/sca-osv-scanner.json', productName: 'Juice Shop', scanType: 'OSV Scan', engagementName: 'lukasik446@gmail.com')
         }
     }
 }
