@@ -44,7 +44,8 @@ pipeline {
         }
         stage('SCA scan') {
                     steps {
-                        sh 'osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json'
+                        sh 'osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json 2>/dev/null'
+
                     }
                 }
     }
