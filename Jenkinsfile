@@ -84,6 +84,6 @@ pipeline {
                     echo 'Sending reports to DefectDojo...'
                     defectDojoPublisher(artifact: 'results/zap_xml_report.xml', productName: 'Juice Shop', scanType: 'OSV-scanner', engagementName: 'lukasik446@gmail.com')
 
-                }
+          }
     }
 }
