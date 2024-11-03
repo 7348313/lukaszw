@@ -46,20 +46,21 @@ pipeline {
                     steps {
                         sh 'osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json' || true'
 
-                    }
                 }
-    }
+            }
+         }
         stage('TruffleHog Skan') {
                     steps {
                         script {
-                            // Instalacja TruffleHog
+                            // Instalacja
                             sh 'pip install truffleHog'
 
-                            // Odpalnie  TruffleHog skanu
-                            sh 'trufflehog --json . > trufflehog_results.json'
+                            // Odpalenie skanu
+                            sh 'trufflehog --json . > results/ trufflehog_results.json'
                         }
                     }
                 }
+
     post {
         always {
             echo 'Archiving results...'
@@ -67,6 +68,7 @@ pipeline {
             echo 'Sending reports to DefectDojo...'
            defectDojoPublisher(artifact: 'results/zap_xml_report.xml', productName: 'Juice Shop', scanType: 'ZAP Scan', engagementName: 'lukasik446@gmail.com')
            defectDojoPublisher(artifact: 'results/sca-osv-scanner.json', productName: 'Juice Shop', scanType: 'OSV Scan', engagementName: 'lukasik446@gmail.com')
+           defectDojoPublisher(artifact: 'results/trufflehog_results.json', productName: 'Juice Shop', scanType: 'OSV Scan', engagementName: 'lukasik446@gmail.com')
         }
     }
 }
