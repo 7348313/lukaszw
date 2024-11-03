@@ -17,6 +17,7 @@ pipeline {
                 sh 'mkdir -p results/'
             }
         }
+        // DAST
         stage('DAST') {
             steps {
                 sh '''
@@ -26,49 +27,67 @@ pipeline {
                 '''
                 sh '''
                     docker run --name zap \
-                        -v/Users/lukaszwojcik/BezpiecznyKod/lukaszw/.zap:/zap/wrk/:rw \
+                        -v /Users/lukaszwojcik/BezpiecznyKod/lukaszw/.zap:/zap/wrk/:rw \
                         -t ghcr.io/zaproxy/zaproxy:stable \
                         bash -c "zap.sh -cmd -addonupdate; zap.sh -cmd -addoninstall communityScripts -addoninstall pscanrulesAlpha -addoninstall pscanrulesBeta -autorun /zap/wrk/passive.yaml" || true
-               '''
+                '''
             }
             post {
                 always {
                     sh '''
                         docker cp zap:/zap/wrk/reports/zap_html_report.html ${WORKSPACE}/results/zap_html_report.html
                         docker cp zap:/zap/wrk/reports/zap_xml_report.xml ${WORKSPACE}/results/zap_xml_report.xml
-                        docker stop zap juice-shop
+                        docker stop zap
+                        docker stop juice-shop
                         docker rm zap
+                        docker rm juice-shop
                     '''
                 }
             }
         }
+        // SCA
         stage('SCA scan') {
-                    steps {
-                        sh 'osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json' || true'
+            steps {
+                sh 'osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json || true'
+            }
+        }
+        // TruffleHog scanning for secrets
+        stage('TruffleHog Scan') {
+            steps {
+                script {
+                    sh 'pip install truffleHog'
 
+                    // Run the scan
+                    sh 'trufflehog --json . > results/trufflehog_results.json'
                 }
             }
-         }
-        stage('TruffleHog Skan') {
-                    steps {
-                        script {
-                            // Instalacja
-                            sh 'pip install truffleHog'
-
-                            // Odpalenie skanu
-                            sh 'trufflehog --json . > results/ trufflehog_results.json'
-                        }
-                    }
+        }
+        // Semgrep installation
+        stage('Install Semgrep') {
+            steps {
+                script {
+                    sh 'pip install semgrep'
                 }
-
+            }
+        }
+        // Run Semgrep Scan
+        stage('Run Semgrep Scan') {
+            steps {
+                script {
+                    // Run Semgrep scan
+                    sh 'semgrep --config "auto" --output results/semgrep_results.json .'
+                }
+            }
+        }
+    }
     post {
         always {
             echo 'Archiving results...'
             archiveArtifacts artifacts: 'results/**/*', fingerprint: true, allowEmptyArchive: true
             echo 'Sending reports to DefectDojo...'
-           defectDojoPublisher(artifact: 'results/zap_xml_report.xml', productName: 'Juice Shop', scanType: 'ZAP Scan', engagementName: 'lukasik446@gmail.com')
-           defectDojoPublisher(artifact: 'results/sca-osv-scanner.json', productName: 'Juice Shop', scanType: 'OSV Scan', engagementName: 'lukasik446@gmail.com')
-           defectDojoPublisher(artifact: 'results/trufflehog_results.json', productName: 'Juice Shop', scanType: 'OSV Scan', engagementName: 'lukasik446@gmail.com')
+            defectDojoPublisher(artifact: 'results/zap_xml_report.xml', productName: 'Juice Shop', scanType: 'ZAP Scan', engagementName: 'lukasik446@gmail.com')
+            defectDojoPublisher(artifact: 'results/sca-osv-scanner.json', productName: 'Juice Shop', scanType: 'OSV Scan', engagementName: 'lukasik446@gmail.com')
+            defectDojoPublisher(artifact: 'results/trufflehog_results.json', productName: 'Juice Shop', scanType: 'TruffleHog Scan', engagementName: 'lukasik446@gmail.com')
         }
     }
 }
