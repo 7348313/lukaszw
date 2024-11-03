@@ -56,7 +56,7 @@ pipeline {
                 }
             }
         }
-        // TruffleHog scanning for secrets
+        // TruffleHog
         stage('TruffleHog Scan') {
             steps {
                 script {
@@ -64,7 +64,7 @@ pipeline {
                 }
             }
         }
-        // Run Semgrep Scan
+        //Semgrep
         stage('Run Semgrep Scan') {
             steps {
                 script {
@@ -80,8 +80,8 @@ pipeline {
             echo 'Sending reports to DefectDojo...'
             defectDojoPublisher(artifact: 'results/zap_xml_report.xml', productName: 'Juice Shop', scanType: 'ZAP Scan', engagementName: 'lukasik446@gmail.com')
             defectDojoPublisher(artifact: 'results/sca-osv-scanner.json', productName: 'Juice Shop', scanType: 'OSV Scan', engagementName: 'lukasik446@gmail.com')
-            defectDojoPublisher(artifact: 'results/trufflehog_results.json', productName: 'Juice Shop', scanType: 'TruffleHog Scan', engagementName: 'lukasik446@gmail.com')
-            defectDojoPublisher(artifact: 'results/sast-semgrep.json', productName: 'Juice Shop', scanType: 'Semgrep Scan', engagementName: 'lukasik446@gmail.com')
+            defectDojoPublisher(artifact: 'results/trufflehog_results.json', productName: 'Juice Shop', scanType: 'TruffleHog', engagementName: 'lukasik446@gmail.com')
+            defectDojoPublisher(artifact: 'results/sast-semgrep.json', productName: 'Juice Shop', scanType: 'Semgrep', engagementName: 'lukasik446@gmail.com')
         }
     }
 }
