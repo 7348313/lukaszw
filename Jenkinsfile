@@ -55,7 +55,8 @@ pipeline {
         stage('TruffleHog Scan') {
             steps {
                 script {
-                    sh 'trufflehog --json . > results/trufflehog_results.json'
+                   // sh 'trufflehog --json . > results/trufflehog_results.json'
+                    trufflehog git file://. --only-verified --json > results/trufflehog_results.json
                 }
             }
         }
