@@ -49,6 +49,17 @@ pipeline {
                     }
                 }
     }
+        stage('TruffleHog Skan') {
+                    steps {
+                        script {
+                            // Instalacja TruffleHog
+                            sh 'pip install truffleHog'
+
+                            // Odpalnie  TruffleHog skanu
+                            sh 'trufflehog --json . > trufflehog_results.json'
+                        }
+                    }
+                }
     post {
         always {
             echo 'Archiving results...'
