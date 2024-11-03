@@ -34,28 +34,33 @@ pipeline {
             }
             post {
                 always {
-                    sh '''
-                        docker cp zap:/zap/wrk/reports/zap_html_report.html ${WORKSPACE}/results/zap_html_report.html
-                        docker cp zap:/zap/wrk/reports/zap_xml_report.xml ${WORKSPACE}/results/zap_xml_report.xml
-                        docker stop zap
-                        docker stop juice-shop
-                        docker rm zap
-                        docker rm juice-shop
-                    '''
+                    script {
+                        // Try to stop and remove the containers, if they exist
+                        sh 'docker stop zap || true'
+                        sh 'docker rm zap || true'
+                        sh 'docker stop juice-shop || true'
+                        sh 'docker rm juice-shop || true'
+                    }
                 }
             }
         }
         // SCA
         stage('SCA scan') {
             steps {
-                sh 'osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json || true'
+                script {
+                    try {
+                        sh 'osv-scanner scan --lockfile package-lock.json --format json --output results/sca-osv-scanner.json'
+                    } catch (Exception e) {
+                        echo "SCA scan failed: ${e}"
+                    }
+                }
             }
         }
         // TruffleHog scanning for secrets
         stage('TruffleHog Scan') {
             steps {
                 script {
-                    sh 'trufflehog git file://. --json > results/trufflehog_results.json'
+                    sh 'trufflehog git file://. --only-verified --json > results/trufflehog_results.json'
                 }
             }
         }
@@ -63,8 +68,7 @@ pipeline {
         stage('Run Semgrep Scan') {
             steps {
                 script {
-                    // Run Semgrep scan
-                    sh 'semgrep scan --config auto --json-output=results/semgrep_results.json'
+                    sh 'semgrep --config auto --json-output results/semgrep_results.json .'
                 }
             }
         }
@@ -77,7 +81,7 @@ pipeline {
             defectDojoPublisher(artifact: 'results/zap_xml_report.xml', productName: 'Juice Shop', scanType: 'ZAP Scan', engagementName: 'lukasik446@gmail.com')
             defectDojoPublisher(artifact: 'results/sca-osv-scanner.json', productName: 'Juice Shop', scanType: 'OSV Scan', engagementName: 'lukasik446@gmail.com')
             defectDojoPublisher(artifact: 'results/trufflehog_results.json', productName: 'Juice Shop', scanType: 'TruffleHog Scan', engagementName: 'lukasik446@gmail.com')
-            defectDojoPublisher(artifact: 'results/semgrep_results.json', productName: 'Juice Shop', scanType: 'TruffleHog Scan', engagementName: 'lukasik446@gmail.com')
+            defectDojoPublisher(artifact: 'results/semgrep_results.json', productName: 'Juice Shop', scanType: 'Semgrep Scan', engagementName: 'lukasik446@gmail.com')
         }
     }
 }
