@@ -61,7 +61,6 @@ pipeline {
             steps {
                 script {
                     sh 'trufflehog git file://. --only-verified --json > results/trufflehog_results.json'
-                    trufflehog git file://. --only-verified --json > results/trufflehog_results.json
                 }
             }
         }
