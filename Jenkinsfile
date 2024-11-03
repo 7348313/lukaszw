@@ -69,7 +69,6 @@ pipeline {
             steps {
                 script {
                     sh 'semgrep --config auto --json-output results/semgrep_results.json .'
-                    semgrep scan --config auto --json-output=results/sast-semgrep.json
                 }
             }
         }
