@@ -55,8 +55,7 @@ pipeline {
         stage('TruffleHog Scan') {
             steps {
                 script {
-                   // sh 'trufflehog --json . > results/trufflehog_results.json'
-                    trufflehog git file://. --only-verified --json > results/trufflehog_results.json
+                    sh 'trufflehog git file://. --only-verified --json > results/trufflehog_results.json'
                 }
             }
         }
@@ -64,8 +63,7 @@ pipeline {
         stage('Run Semgrep Scan') {
             steps {
                 script {
-                    // Run Semgrep scan
-                    sh 'semgrep --config "auto" --output results/semgrep_results.json .'
+                    sh 'semgrep --config auto --json-output results/semgrep_results.json .'
                 }
             }
         }
@@ -78,7 +76,7 @@ pipeline {
             defectDojoPublisher(artifact: 'results/zap_xml_report.xml', productName: 'Juice Shop', scanType: 'ZAP Scan', engagementName: 'lukasik446@gmail.com')
             defectDojoPublisher(artifact: 'results/sca-osv-scanner.json', productName: 'Juice Shop', scanType: 'OSV Scan', engagementName: 'lukasik446@gmail.com')
             defectDojoPublisher(artifact: 'results/trufflehog_results.json', productName: 'Juice Shop', scanType: 'TruffleHog Scan', engagementName: 'lukasik446@gmail.com')
-            defectDojoPublisher(artifact: 'results/semgrep_results.json', productName: 'Juice Shop', scanType: 'TruffleHog Scan', engagementName: 'lukasik446@gmail.com')
+            defectDojoPublisher(artifact: 'results/semgrep_results.json', productName: 'Juice Shop', scanType: 'Semgrep Scan', engagementName: 'lukasik446@gmail.com')
         }
     }
 }
